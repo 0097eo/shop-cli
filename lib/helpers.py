@@ -1,5 +1,9 @@
 from db.models import Customer, Shoe, Order
 
+def exit_program():
+    print("Adios!")
+    exit()
+
 def list_Customers():
     customers = Customer.get_all_customers()
     for customer in customers:
