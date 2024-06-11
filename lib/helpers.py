@@ -8,21 +8,17 @@ def list_Customers():
     customers = Customer.get_all_customers()
     for customer in customers:
         print(customer)
-
+    return customers
 
 def find_customer_by_name():
-    name = input("Enter customer's name: ")
-    customer = Customer.get_customer_by_name(name)
-    print(customer) if customer else print(
-        f"Customer {name} not found"
-    )
+    first_name = input("Enter customer's first name: ")
+    customer = Customer.get_customer_by_name(first_name)
+    print(customer) if customer else print(f"Customer {first_name} not found")
 
 def find_customer_by_id():
     customer_id = int(input("Enter customer's id: "))
     customer = Customer.get_customer_by_id(customer_id)
-    print(customer) if customer else print(
-        f"Customer {customer_id} not found"
-    )
+    print(customer) if customer else print(f"Customer {customer_id} not found")
 
 def create_customer():
     first_name = input("Enter customer's first name: ")
@@ -30,30 +26,31 @@ def create_customer():
     address = input("Enter customer's address: ")
     try:
         customer = Customer.create(first_name, last_name, address)
-        print(f"success: {customer} created")
+        print(f"Success: {customer} created")
     except Exception as e:
-        print("error creating department: ", e)
+        print("Error creating customer: ", e)
 
 def update_customer_address():
-    customer_id = input("Enter the customer's name: ")
+    customers = list_Customers()
+    customer_id = int(input("Enter the customer's Id: "))
     if customer := Customer.get_customer_by_id(customer_id):
         try:
-            address = input("Enter the new address")
+            address = input("Enter the new address: ")
             customer.address = address
             customer.update_address()
-            print(f"success: {customer} updated")
+            print(f"Success: {customer} updated")
         except Exception as e:
-            print("error updating address: ", e)
+            print("Error updating address: ", e)
     else:
         print(f"Customer {customer_id} not found")
-    
 
 def delete_customer():
-    customer_id = int(input("Enter the customer's id"))
+    customers = list_Customers()
+    customer_id = int(input("Enter the customer's id: "))
     customer = Customer.get_customer_by_id(customer_id)
     if customer:
         customer.delete_customer()
-        print(f"success: {customer} deleted")
+        print(f"Success: {customer} deleted")
     else:
         print(f"Customer {customer_id} not found")
 
@@ -61,48 +58,48 @@ def list_shoes():
     shoes = Shoe.get_all_shoes()
     for shoe in shoes:
         print(shoe)
+    return shoes
 
 def find_shoe_by_name():
     name = input("Enter shoe's name: ")
     shoe = Shoe.get_shoe_by_name(name)
-    print(shoe) if shoe else print(
-        f"Shoe {name} not found"
-    )
+    print(shoe) if shoe else print(f"Shoe {name} not found")
 
 def find_shoe_by_id():
     shoe_id = int(input("Enter shoe's id: "))
     shoe = Shoe.get_shoe_by_id(shoe_id)
-    print(shoe) if shoe else print(
-        f"Shoe {shoe_id} not found"
-    )
+    print(shoe) if shoe else print(f"Shoe {shoe_id} not found")
 
 def create_shoe():
     name = input("Enter shoe's name: ")
     brand = input("Enter shoe's brand: ")
-    size = input("Enter shoe's size: ")
-    price = input("Enter shoe's price: ")
+    size = int(input("Enter shoe's size: "))
+    price = int(input("Enter shoe's price: "))
     try:
         shoe = Shoe.create(name, brand, size, price)
-        print(f"success: {shoe} created")
+        print(f"Success: {shoe} created")
     except Exception as e:
-        print("error creating department: ", e)
+        print("Error creating shoe: ", e)
 
 def update_shoe_price():
+    shoes = list_shoes()
     shoe_id = int(input("Enter shoe's id: "))
     shoe = Shoe.get_shoe_by_id(shoe_id)
     if shoe:
-        price = input("Enter shoe's new price: ")
-        shoe.update_price(price)
-        print(f"success: {shoe} updated")
+        price = int(input("Enter shoe's new price: "))
+        shoe.price = price
+        shoe.update_price()
+        print(f"Success: {shoe} updated")
     else:
         print(f"Shoe {shoe_id} not found")
 
 def delete_shoe():
+    shoes = list_shoes()
     shoe_id = int(input("Enter shoe's id: "))
     shoe = Shoe.get_shoe_by_id(shoe_id)
     if shoe:
         shoe.delete_shoe()
-        print(f"success: {shoe} deleted")
+        print(f"Success: {shoe} deleted")
     else:
         print(f"Shoe {shoe_id} not found")
 
@@ -110,10 +107,10 @@ def list_orders():
     orders = Order.get_all_orders()
     for order in orders:
         print(order)
+    return orders
 
 def create_order():
-    """Creates a new order for a customer and shoe."""
-    customers = list_Customers() 
+    customers = list_Customers()
     customer_id = int(input("Enter customer ID from the list: "))
     customer = Customer.get_customer_by_id(customer_id)
     if not customer:
@@ -136,7 +133,6 @@ def create_order():
         print(f"Error creating order: {e}")
 
 def list_orders_by_customer():
-    """Lists all orders for a specific customer."""
     customers = list_Customers()
     customer_id = int(input("Enter customer ID from the list: "))
     customer = Customer.get_customer_by_id(customer_id)
@@ -153,7 +149,6 @@ def list_orders_by_customer():
             print(order)
 
 def list_orders_by_shoe():
-    """Lists all orders for a specific shoe."""
     shoes = list_shoes()
     shoe_id = int(input("Enter shoe ID from the list: "))
     shoe = Shoe.get_shoe_by_id(shoe_id)
@@ -170,8 +165,7 @@ def list_orders_by_shoe():
             print(order)
 
 def update_order_quantity():
-    """Updates the quantity of an existing order."""
-    orders = list_orders() 
+    orders = list_orders()
     order_id = int(input("Enter order ID from the list: "))
     order = Order.get_order_by_id(order_id)
     if not order:
@@ -182,14 +176,13 @@ def update_order_quantity():
 
     try:
         order.quantity = new_quantity
-        order.save()  
+        order.save()
         print(f"Success: Order {order} quantity updated.")
     except Exception as e:
         print(f"Error updating order quantity: {e}")
 
 def delete_order():
-    """Deletes an existing order."""
-    orders = list_orders() 
+    orders = list_orders()
     order_id = int(input("Enter order ID from the list: "))
     order = Order.get_order_by_id(order_id)
     if not order:
@@ -199,7 +192,7 @@ def delete_order():
     confirm = input(f"Are you sure you want to delete order {order}? (y/n): ")
     if confirm.lower() == "y":
         try:
-            order.delete() 
+            order.delete()
             print(f"Success: Order {order} deleted.")
         except Exception as e:
             print(f"Error deleting order: {e}")

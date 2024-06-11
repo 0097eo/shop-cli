@@ -63,7 +63,7 @@ def main():
 
 
 def menu():
-    print("Kindly select an option to proceed: ")
+    print("What do you want to do?: ")
     print("0. Quit")
     print("1. List all Customers")
     print("2. Find Customer by Name")

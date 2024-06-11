@@ -1,7 +1,8 @@
-from connection import CONN, CURSOR
+from db.connection import CONN, CURSOR
 
 class Shoe:
-    all = []
+    all = {}
+
     def __init__(self, shoe_id, name, brand, size, price):
         self.shoe_id = shoe_id
         self.name = name
@@ -20,12 +21,11 @@ class Shoe:
     def name(self, new_name):
         if hasattr(self, '_name'):
             raise AttributeError("Name cannot be changed once instantiated")
+        if isinstance(new_name, str):
+            self._name = new_name
         else:
-            if isinstance(new_name, str):
-                self._name = new_name
-            else:
-                raise TypeError("Name must be a string")
-            
+            raise TypeError("Name must be a string")
+
     @property
     def brand(self):
         return self._brand
@@ -34,12 +34,11 @@ class Shoe:
     def brand(self, new_brand):
         if hasattr(self, '_brand'):
             raise AttributeError("Brand cannot be changed once instantiated")
+        if isinstance(new_brand, str):
+            self._brand = new_brand
         else:
-            if isinstance(new_brand, str):
-                self._brand = new_brand
-            else:
-                raise TypeError("Brand must be a string")
-            
+            raise TypeError("Brand must be a string")
+
     @property
     def size(self):
         return self._size
@@ -48,12 +47,11 @@ class Shoe:
     def size(self, new_size):
         if hasattr(self, '_size'):
             raise AttributeError("Size cannot be changed once instantiated")
+        if isinstance(new_size, int):
+            self._size = new_size
         else:
-            if isinstance(new_size, int):
-                self._size = new_size
-            else:
-                raise TypeError("Size must be an integer")
-            
+            raise TypeError("Size must be an integer")
+
     @property
     def price(self):
         return self._price
@@ -63,10 +61,10 @@ class Shoe:
         if isinstance(new_price, int):
             self._price = new_price
         else:
-            raise TypeError("Price must be a integer")
-        
+            raise TypeError("Price must be an integer")
+
     @classmethod
-    def create_shoe_table(cls, name, brand, size, price):
+    def create_shoe_table(cls):
         sql = """
             CREATE TABLE IF NOT EXISTS shoes (
             shoe_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +76,6 @@ class Shoe:
         """
         CURSOR.execute(sql)
         CONN.commit()
-        return cls(CURSOR.lastrowid, name, brand, size, price)
     
     def save_shoe(self):
         sql = """
@@ -87,49 +84,43 @@ class Shoe:
         """
         CURSOR.execute(sql, (self.name, self.brand, self.size, self.price))
         CONN.commit()
-
-        type(self).all[CURSOR.lastrowid] = self
+        self.shoe_id = CURSOR.lastrowid
+        type(self).all[self.shoe_id] = self
 
     def update_price(self):
         sql = """
             UPDATE shoes
             SET price = ?
-            WHERE id = ?
+            WHERE shoe_id = ?
         """
-        CURSOR.execute(sql, (self.price,))
+        CURSOR.execute(sql, (self.price, self.shoe_id))
         CONN.commit()
 
     def delete_shoe(self):
         sql = """
             DELETE FROM shoes
-            WHERE id = ?
+            WHERE shoe_id = ?
         """
-
-        CURSOR.execute(sql, (self.shoe_id))
+        CURSOR.execute(sql, (self.shoe_id,))
         CONN.commit()
         del type(self).all[self.shoe_id]
         self.shoe_id = None
 
     @classmethod
     def create(cls, name, brand, size, price):
-        shoe = cls(name, brand, size, price)
+        shoe = cls(None, name, brand, size, price)
         shoe.save_shoe()
         return shoe
     
     @classmethod
     def instance_of_shoe(cls, row):
-        shoe = cls.all.get(row[0])
-        if shoe:
-            shoe.name = row[1]
-            shoe.brand = row[2]
-            shoe.size = row[3]
-            shoe.price = row[4]
-        else:
-            shoe = cls (row[1], row[2], row[3], row[4])
-            shoe_id = row[0]
+        shoe_id, name, brand, size, price = row
+        shoe = cls.all.get(shoe_id)
+        if not shoe:
+            shoe = cls(shoe_id, name, brand, size, price)
             cls.all[shoe_id] = shoe
         return shoe
-    
+
     @classmethod
     def get_all_shoes(cls):
         sql = """
@@ -143,7 +134,7 @@ class Shoe:
     def get_shoe_by_id(cls, shoe_id):
         sql = """
             SELECT * FROM shoes
-            WHERE id = ?
+            WHERE shoe_id = ?
         """
         CURSOR.execute(sql, (shoe_id,))
         row = CURSOR.fetchone()
@@ -161,7 +152,8 @@ class Shoe:
     
 
 class Customer:
-    all = []
+    all = {}
+
     def __init__(self, customer_id, first_name, last_name, address):
         self.customer_id = customer_id
         self.first_name = first_name
@@ -171,7 +163,6 @@ class Customer:
     def __repr__(self):
         return f"<Customer: {self.customer_id}, {self.first_name}, {self.last_name}, {self.address}>"
     
-
     @property
     def first_name(self):
         return self._first_name
@@ -180,13 +171,11 @@ class Customer:
     def first_name(self, new_first_name):
         if hasattr(self, '_first_name'):
             raise AttributeError("First name cannot be changed once instantiated")
+        if isinstance(new_first_name, str):
+            self._first_name = new_first_name
         else:
-            if isinstance(new_first_name, str):
-                self._first_name = new_first_name
-            else:
-                raise TypeError("First name must be a string")
-            
-    
+            raise TypeError("First name must be a string")
+
     @property
     def last_name(self):
         return self._last_name
@@ -195,12 +184,11 @@ class Customer:
     def last_name(self, new_last_name):
         if hasattr(self, '_last_name'):
             raise AttributeError("Last name cannot be changed once instantiated")
+        if isinstance(new_last_name, str):
+            self._last_name = new_last_name
         else:
-            if isinstance(new_last_name, str):
-                self._last_name = new_last_name
-            else:
-                raise TypeError("Last name must be a string")
-            
+            raise TypeError("Last name must be a string")
+
     @property
     def address(self):
         return self._address
@@ -210,10 +198,10 @@ class Customer:
         if isinstance(new_address, str):
             self._address = new_address
         else:
-            raise TypeError("Adress must be a string")
+            raise TypeError("Address must be a string")
         
     @classmethod
-    def create_customer_table(cls, first_name, last_name, address):
+    def create_customer_table(cls):
         sql = """
             CREATE TABLE IF NOT EXISTS customers (
             customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -224,9 +212,7 @@ class Customer:
         """
         CURSOR.execute(sql)
         CONN.commit()
-        return cls(CURSOR.lastrowid, first_name, last_name, address)
     
-
     def save_customer(self):
         sql = """
             INSERT INTO customers (first_name, last_name, address)
@@ -234,45 +220,40 @@ class Customer:
         """
         CURSOR.execute(sql, (self.first_name, self.last_name, self.address))
         CONN.commit()
-
-        type(self).all[CURSOR.lastrowid] = self
+        self.customer_id = CURSOR.lastrowid
+        type(self).all[self.customer_id] = self
 
     def update_address(self):
         sql = """
             UPDATE customers
             SET address = ?
-            WHERE id =?
+            WHERE customer_id =?
         """
-        CURSOR.execute(sql, (self.address,))
+        CURSOR.execute(sql, (self.address, self.customer_id))
         CONN.commit()
 
     def delete_customer(self):
         sql = """
             DELETE FROM customers
-            WHERE id = ?
+            WHERE customer_id = ?
         """
-        CURSOR.execute(sql, (self.customer_id))
+        CURSOR.execute(sql, (self.customer_id,))
         CONN.commit()
         del type(self).all[self.customer_id]
         self.customer_id = None
 
-
     @classmethod
     def create(cls, first_name, last_name, address):
-        shoe = cls(first_name, last_name, address)
-        shoe.save_customer()
-        return shoe
+        customer = cls(None, first_name, last_name, address)
+        customer.save_customer()
+        return customer
 
-
+    @classmethod
     def instance_of_customer(cls, row):
-        customer = cls.all.get(row[0])
-        if customer:
-            customer.first_name = row[1]
-            customer.last_name = row[2]
-            customer.address = row[3]
-        else:
-            customer = cls (row[1], row[2], row[3])
-            customer_id = row[0]
+        customer_id, first_name, last_name, address = row
+        customer = cls.all.get(customer_id)
+        if not customer:
+            customer = cls(customer_id, first_name, last_name, address)
             cls.all[customer_id] = customer
         return customer
 
@@ -283,17 +264,17 @@ class Customer:
         """
         CURSOR.execute(sql)
         rows = CURSOR.fetchall()
-        return [cls.instance_of_customer(row) for row in rows]  # unpacking row using *
+        return [cls.instance_of_customer(row) for row in rows]
 
     @classmethod
     def get_customer_by_id(cls, customer_id):
         sql = """
             SELECT * FROM customers
-            WHERE id =?
+            WHERE customer_id =?
         """
         CURSOR.execute(sql, (customer_id,))
         row = CURSOR.fetchone()
-        return cls.instance_of_customer(row)
+        return cls.instance_of_customer(row) if row else None
     
     @classmethod
     def get_customer_by_name(cls, name):
@@ -321,9 +302,11 @@ class Order:
         sql = """
             CREATE TABLE IF NOT EXISTS orders (
             order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            customer_id INTEGER FOREIGN KEY REFERENCES customers(customer_id),
-            shoe_id INTEGER FOREIGN KEY REFERENCES shoes(shoe_id),
-            quantity INTEGER
+            customer_id INTEGER NOT NULL,
+            shoe_id INTEGER NOT NULL,
+            quantity INTEGER,
+            FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+            FOREIGN KEY (shoe_id) REFERENCES shoes(shoe_id)
             )
         """
         CURSOR.execute(sql)
@@ -346,7 +329,7 @@ class Order:
         """
         CURSOR.execute(sql)
         rows = CURSOR.fetchall()
-        return [cls(*row) for row in rows]  # unpacking row using *
+        return [cls(*row) for row in rows]
 
     @classmethod
     def get_order_by_id(cls, order_id):
@@ -357,9 +340,8 @@ class Order:
         CURSOR.execute(sql, (order_id,))
         row = CURSOR.fetchone()
         if row:
-            return cls(*row)  # unpacking row using *
-        else:
-            return None
+            return cls(*row)
+        return None
 
     @classmethod
     def get_orders_by_customer_id(cls, customer_id):
@@ -369,7 +351,7 @@ class Order:
         """
         CURSOR.execute(sql, (customer_id,))
         rows = CURSOR.fetchall()
-        return [cls(*row) for row in rows]  # unpacking row using *
+        return [cls(*row) for row in rows]
 
     @classmethod
     def get_orders_by_shoe_id(cls, shoe_id):
