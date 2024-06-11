@@ -295,6 +295,16 @@ class Customer:
         row = CURSOR.fetchone()
         return cls.instance_of_customer(row)
     
+    @classmethod
+    def get_customer_by_name(cls, name):
+        sql = """
+            SELECT * FROM customers
+            WHERE first_name =?
+        """
+        CURSOR.execute(sql, (name,))
+        row = CURSOR.fetchone()
+        return cls.instance_of_customer(row) if row else None
+    
 
 class Order:
     def __init__(self, order_id, customer, shoe, quantity):
