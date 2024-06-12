@@ -288,6 +288,7 @@ class Customer:
     
 
 class Order:
+    all = {}
     def __init__(self, order_id, customer, shoe, quantity):
         self.order_id = order_id
         self.customer = customer
@@ -362,3 +363,22 @@ class Order:
         CURSOR.execute(sql, (shoe_id,))
         rows = CURSOR.fetchall()
         return [cls(*row) for row in rows]
+    
+    def save(self):
+        sql = """
+            UPDATE ORDERS
+            SET quantity = ?
+            WHERE order_id = ?
+        """
+        CURSOR.execute(sql, (self.quantity, self.order_id))
+        CONN.commit()
+
+    def delete(self):
+        sql = """
+            DELETE FROM orders
+            WHERE order_id = ?
+        """
+        CURSOR.execute(sql, (self.order_id,))
+        CONN.commit()
+        del type(self).all[self.order_id]
+        self.order_id = None

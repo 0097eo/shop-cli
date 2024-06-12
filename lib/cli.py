@@ -14,6 +14,7 @@ from helpers import (
     delete_shoe,
     list_orders,
     create_order,
+    list_orders_by_shoe,
     list_orders_by_customer,
     update_order_quantity,
     delete_order
@@ -22,7 +23,7 @@ from helpers import (
 def main():
     while True:
         menu()
-        choice = input(">")
+        choice = input("=>")
         if choice == "0":
             exit_program()
         elif choice == "1":
@@ -54,16 +55,18 @@ def main():
         elif choice == "14":
             list_orders_by_customer()
         elif choice == "15":
-            create_order()
+            list_orders_by_shoe()
         elif choice == "16":
-            update_order_quantity()
+            create_order()
         elif choice == "17":
+            update_order_quantity()
+        elif choice == "18":
             delete_order()
         
 
 
 def menu():
-    print("What do you want to do?: ")
+    print("What do you want to do ? ")
     print("0. Quit")
     print("1. List all Customers")
     print("2. Find Customer by Name")
@@ -79,9 +82,10 @@ def menu():
     print("12. Update Shoe Price")
     print("13. List all Orders")
     print("14. Find Order by a Customer ID")
-    print("15. Create Order")
-    print("16. Update Order Quantity")
-    print("17. Delete Order")
+    print("15. Find Order by a Shoe ID")
+    print("16. Create Order")
+    print("17. Update Order Quantity")
+    print("18. Delete Order")
 
 if __name__ == "__main__":
     main()
